@@ -145,7 +145,7 @@ Private Function getSession_token(CorpNum As String) As String
         refresh = True
     Else
         Dim utcnow As String
-        utcnow = Format(m_Linkhub.UTCTime, "yyyy-MM-ddTHH:mm:ss.sssZ")
+        utcnow = m_Linkhub.GetTime()
         refresh = m_Token.expiration < utcnow
     End If
     
@@ -173,11 +173,12 @@ Private Function httpGET(url As String, BearerToken As String, Optional UserID A
      
     Dim winhttp1
     
-    Set winhttp1 = CreateObject("WinHttp.WinHttpRequest.5.1")
-    Call winhttp1.Open("GET", IIf(m_IsTest, ServiceURL_TEST, ServiceURL_REAL) + url)
+    Set winhttp1 = CreateObject("MSXML2.XMLHTTP.6.0")
+    Call winhttp1.Open("GET", IIf(m_IsTest, ServiceURL_TEST, ServiceURL_REAL) + url, False)
     
     Call winhttp1.setRequestHeader("Authorization", "Bearer " + BearerToken)
     Call winhttp1.setRequestHeader("x-pb-version", APIVersion)
+    Call winhttp1.setRequestHeader("Accept-Encoding", "gzip,deflate")
     
     If UserID <> "" Then
         Call winhttp1.setRequestHeader("x-pb-userid", UserID)
@@ -185,7 +186,6 @@ Private Function httpGET(url As String, BearerToken As String, Optional UserID A
     
     
     winhttp1.Send
-    winhttp1.WaitForResponse
     
     Dim Response As String
     Response = winhttp1.responseText
@@ -205,7 +205,6 @@ Private Function httpGET(url As String, BearerToken As String, Optional UserID A
     Set winhttp1 = Nothing
     
     Set httpGET = m_Linkhub.parse(Response)
-
 End Function
 
 Private Function httpPOST(url As String, BearerToken As String, postdata As String, Optional UserID As String) As Variant
@@ -217,10 +216,10 @@ Private Function httpPOST_override(url As String, BearerToken As String, overrid
      
     Dim winhttp1
     
-    Set winhttp1 = CreateObject("WinHttp.WinHttpRequest.5.1")
-    Call winhttp1.Open("POST", IIf(m_IsTest, ServiceURL_TEST, ServiceURL_REAL) + url)
+    Set winhttp1 = CreateObject("MSXML2.XMLHTTP.6.0")
+    Call winhttp1.Open("POST", IIf(m_IsTest, ServiceURL_TEST, ServiceURL_REAL) + url, False)
     Call winhttp1.setRequestHeader("x-pb-version", APIVersion)
-    
+    Call winhttp1.setRequestHeader("Accept-Encoding", "gzip,deflate")
     
     If BearerToken <> "" Then
         Call winhttp1.setRequestHeader("Authorization", "Bearer " + BearerToken)
@@ -237,8 +236,7 @@ Private Function httpPOST_override(url As String, BearerToken As String, overrid
     Call winhttp1.setRequestHeader("Content-Type", "Application/json")
     
     winhttp1.Send (postdata)
-    winhttp1.WaitForResponse
-    
+        
     Dim Response As String
     Response = winhttp1.responseText
        
@@ -274,9 +272,10 @@ Private Function httpPOST_File(url As String, BearerToken As String, postdata As
     Dim boundary As String
     boundary = "---------------------popbill"
     
-    Set winhttp1 = CreateObject("WinHttp.WinHttpRequest.5.1")
-    Call winhttp1.Open("POST", IIf(m_IsTest, ServiceURL_TEST, ServiceURL_REAL) + url)
+    Set winhttp1 = CreateObject("MSXML2.XMLHTTP.6.0")
+    Call winhttp1.Open("POST", IIf(m_IsTest, ServiceURL_TEST, ServiceURL_REAL) + url, False)
     Call winhttp1.setRequestHeader("x-pb-version", APIVersion)
+    Call winhttp1.setRequestHeader("Accept-Encoding", "gzip,deflate")
     
     
     If BearerToken <> "" Then
@@ -326,8 +325,7 @@ Private Function httpPOST_File(url As String, BearerToken As String, postdata As
     CopyMemory Buffer(Size1 + Size2 + 2), BHeader2(0), Size3 + 1
     
     winhttp1.Send (Buffer)
-    winhttp1.WaitForResponse
-    
+        
     Dim Response As String
     Response = winhttp1.responseText
        
@@ -347,6 +345,166 @@ Private Function httpPOST_File(url As String, BearerToken As String, postdata As
     
     Set httpPOST_File = m_Linkhub.parse(Response)
 
+End Function
+'연동회원 아이디 중복 확인
+Public Function CheckID(IDString As String) As PBResponse
+On Error GoTo ErrHandler
+    Dim result As Variant
+    
+    Set result = httpGET("/IDCheck?ID=" + IDString, "")
+    
+    Set CheckID = New PBResponse
+    CheckID.code = result.Item("code")
+    CheckID.message = result.Item("message")
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    Set CheckID = Nothing
+End Function
+'연동회원 담당자 목록조회
+Public Function ListContact(CorpNum As String, UserID As String) As Collection
+On Error GoTo ErrHandler
+        
+    Dim result As Variant
+       
+    Set result = httpGET("/IDs", getSession_token(CorpNum), UserID)
+    
+    Set ListContact = New Collection
+    
+    Dim T As Variant
+    Dim info As PBContactInfo
+    
+    For Each T In result
+        Set info = New PBContactInfo
+        
+        info.fromDictionary T
+        
+        ListContact.Add info
+    Next
+    
+    Exit Function
+    
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    Set ListContact = Nothing
+End Function
+'담당자 추가
+Public Function RegistContact(CorpNum As String, ContactInfo As PBContactInfo, UserID As String) As PBResponse
+On Error GoTo ErrHandler
+    Set RegistContact = Nothing
+    
+    Dim postdata As String
+    Dim tmp
+    
+    Set tmp = CreateObject("Scripting.Dictionary")
+    
+    tmp.Add "id", ContactInfo.id
+    tmp.Add "pwd", ContactInfo.pwd
+    tmp.Add "personName", ContactInfo.personName
+    tmp.Add "tel", ContactInfo.tel
+    tmp.Add "hp", ContactInfo.hp
+    tmp.Add "fax", ContactInfo.fax
+    tmp.Add "email", ContactInfo.email
+    tmp.Add "searchAllAllowYN", ContactInfo.searchAllAllowYN
+    tmp.Add "mgrYN", ContactInfo.mgrYN
+            
+    postdata = m_Linkhub.toString(tmp)
+    
+    Dim result As Variant
+    
+    Set result = httpPOST("/IDs/New", getSession_token(CorpNum), postdata)
+    
+    Set RegistContact = New PBResponse
+    
+    RegistContact.code = result.Item("code")
+    RegistContact.message = result.Item("message")
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+End Function
+'담당자 정보 수정
+Public Function UpdateContact(CorpNum As String, ContactInfo As PBContactInfo, UserID As String) As PBResponse
+On Error GoTo ErrHandler
+    Set UpdateContact = Nothing
+    
+    Dim postdata As String
+    Dim tmp
+    
+    Set tmp = CreateObject("Scripting.Dictionary")
+    
+    tmp.Add "personName", ContactInfo.personName
+    tmp.Add "tel", ContactInfo.tel
+    tmp.Add "hp", ContactInfo.hp
+    tmp.Add "fax", ContactInfo.fax
+    tmp.Add "email", ContactInfo.email
+    tmp.Add "searchAllAllowYN", ContactInfo.searchAllAllowYN
+    tmp.Add "mgrYN", ContactInfo.mgrYN
+            
+    postdata = m_Linkhub.toString(tmp)
+    
+    Dim result As Variant
+    
+    Set result = httpPOST("/IDs", getSession_token(CorpNum), postdata, UserID)
+    
+    Set UpdateContact = New PBResponse
+    
+    UpdateContact.code = result.Item("code")
+    UpdateContact.message = result.Item("message")
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+End Function
+'회사정보 수정
+Public Function UpdateCorpInfo(CorpNum As String, CorpInfo As PBCorpInfo, UserID As String) As PBResponse
+On Error GoTo ErrHandler
+    Set UpdateCorpInfo = Nothing
+    
+    Dim postdata As String
+    Dim tmp
+    
+    Set tmp = CreateObject("Scripting.Dictionary")
+    
+    tmp.Add "ceoname", CorpInfo.ceoname
+    tmp.Add "corpName", CorpInfo.corpName
+    tmp.Add "addr", CorpInfo.addr
+    tmp.Add "bizType", CorpInfo.bizType
+    tmp.Add "bizClass", CorpInfo.bizClass
+            
+    postdata = m_Linkhub.toString(tmp)
+    
+    Dim result As Variant
+    
+    Set result = httpPOST("/CorpInfo", getSession_token(CorpNum), postdata, UserID)
+    
+    Set UpdateCorpInfo = New PBResponse
+    
+    UpdateCorpInfo.code = result.Item("code")
+    UpdateCorpInfo.message = result.Item("message")
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+End Function
+'회사정보 조회
+Public Function GetCorpInfo(CorpNum As String, UserID As String) As PBCorpInfo
+On Error GoTo ErrHandler
+    Dim result As Variant
+       
+    Set result = httpGET("/CorpInfo", getSession_token(CorpNum), UserID)
+    
+    Set GetCorpInfo = New PBCorpInfo
+        
+    GetCorpInfo.fromDictionary result
+    Exit Function
+    
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    Set GetCorpInfo = Nothing
 End Function
 '회원잔액조회
 Public Function GetBalance(CorpNum As String) As Double
@@ -414,19 +572,19 @@ On Error GoTo ErrHandler
     
     tmp.Add "LinkID", JoinInfo.linkID
     tmp.Add "CorpNum", JoinInfo.CorpNum
-    tmp.Add "CorpName", JoinInfo.CorpName
-    tmp.Add "CEOName", JoinInfo.CEOName
-    tmp.Add "Addr", JoinInfo.Addr
+    tmp.Add "CorpName", JoinInfo.corpName
+    tmp.Add "CEOName", JoinInfo.ceoname
+    tmp.Add "Addr", JoinInfo.addr
     tmp.Add "ZipCode", JoinInfo.ZipCode
-    tmp.Add "BizClass", JoinInfo.BizClass
-    tmp.Add "BizType", JoinInfo.BizType
+    tmp.Add "BizClass", JoinInfo.bizClass
+    tmp.Add "BizType", JoinInfo.bizType
     tmp.Add "ContactName", JoinInfo.ContactName
     tmp.Add "ContactEmail", JoinInfo.ContactEmail
     tmp.Add "ContactFAX", JoinInfo.ContactFAX
     tmp.Add "ContactHP", JoinInfo.ContactHP
     tmp.Add "ContactTEL", JoinInfo.ContactTEL
-    tmp.Add "ID", JoinInfo.ID
-    tmp.Add "PWD", JoinInfo.PWD
+    tmp.Add "ID", JoinInfo.id
+    tmp.Add "PWD", JoinInfo.pwd
     
     postdata = m_Linkhub.toString(tmp)
     
@@ -501,6 +659,33 @@ ErrHandler:
     m_LastErrCode = Err.Number
     m_LastErrMessage = Err.Description
     Set CheckMgtKeyInUse = Nothing
+End Function
+
+'즉시발행
+Public Function RegistIssue(CorpNum As String, Cashbill As PBCashbill, Optional UserID As String = "") As PBResponse
+    On Error GoTo ErrHandler
+
+    Dim result As Variant
+    Dim tmpDic As Variant
+    
+    Set tmpDic = Cashbill.toDictionary
+    
+    Dim postdata As String
+    
+    postdata = m_Linkhub.toString(tmpDic)
+    
+    Set result = httpPOST_override("/Cashbill", getSession_token(CorpNum), "ISSUE", postdata, UserID)
+    
+    Set RegistIssue = New PBResponse
+    
+    RegistIssue.code = result.Item("code")
+    RegistIssue.message = result.Item("message")
+    
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    Set RegistIssue = Nothing
 End Function
 '임시저장
 Public Function Register(CorpNum As String, Cashbill As PBCashbill, Optional UserID As String = "") As PBResponse
@@ -588,7 +773,7 @@ ErrHandler:
     Set Delete = Nothing
 End Function
 '발행
-Public Function Issue(CorpNum As String, mgtKey As String, Optional Memo As String, Optional UserID As String) As PBResponse
+Public Function Issue(CorpNum As String, mgtKey As String, Optional memo As String, Optional UserID As String) As PBResponse
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -600,7 +785,7 @@ On Error GoTo ErrHandler
     Dim tmp As Variant
     Set tmp = CreateObject("Scripting.Dictionary")
     
-    tmp.Add "memo", Memo
+    tmp.Add "memo", memo
     
     postdata = m_Linkhub.toString(tmp)
     
@@ -619,7 +804,7 @@ ErrHandler:
 End Function
 
 '발행 취소
-Public Function CancelIssue(CorpNum As String, mgtKey As String, Optional Memo As String, Optional UserID As String) As PBResponse
+Public Function CancelIssue(CorpNum As String, mgtKey As String, Optional memo As String, Optional UserID As String) As PBResponse
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -629,7 +814,7 @@ On Error GoTo ErrHandler
     
     Dim postdata As String
     
-    postdata = "{""memo"":""" + Memo + """}"
+    postdata = "{""memo"":""" + memo + """}"
     
     Set result = httpPOST_override("/Cashbill/" + mgtKey, _
                                 getSession_token(CorpNum), "CANCELISSUE", postdata, UserID)

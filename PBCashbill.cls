@@ -13,7 +13,7 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-
+Public memo As String
 Public mgtKey As String
 Public tradeDate As String
 Public tradeUsage As String
@@ -52,6 +52,7 @@ Public orgTradeDate As String
 Public Function toDictionary() As Variant
 Set toDictionary = CreateObject("Scripting.Dictionary")
     
+    toDictionary.Add "memo", memo
     toDictionary.Add "mgtKey", mgtKey
     toDictionary.Add "tradeDate", tradeDate
     toDictionary.Add "tradeUsage", tradeUsage

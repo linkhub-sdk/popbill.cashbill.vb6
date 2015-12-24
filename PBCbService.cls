@@ -1149,3 +1149,81 @@ ErrHandler:
     m_LastErrMessage = Err.Description
     Set GetLogs = Nothing
 End Function
+
+'문서 목록조회
+Public Function Search(CorpNum As String, DType As String, SDate As String, EDate As String, State As Collection, tradeType As Collection, tradeUsage As Collection, taxationType As Collection, Page As Integer, PerPage As Integer) As PBCBSearchList
+On Error GoTo ErrHandler
+    Dim result As Variant
+    Dim uri As String
+    Dim i As Integer
+    
+    uri = "/Cashbill/Search"
+    uri = uri + "?DType=" + DType
+    uri = uri + "&SDate=" + SDate
+    uri = uri + "&EDate=" + EDate
+    
+    If State.Count > 0 Then
+        uri = uri + "&State="
+        For i = 1 To State.Count
+            If i = State.Count Then
+                uri = uri + State(i)
+            Else
+                uri = uri + State(i) + ","
+            End If
+        Next
+    End If
+    
+    If tradeType.Count > 0 Then
+        uri = uri + "&TradeType="
+        For i = 1 To tradeType.Count
+            If i = tradeType.Count Then
+                uri = uri + tradeType(i)
+            Else
+                uri = uri + tradeType(i) + ","
+            End If
+        Next
+    End If
+    
+    If tradeUsage.Count > 0 Then
+        uri = uri + "&TradeUsage="
+        For i = 1 To tradeUsage.Count
+            If i = tradeUsage.Count Then
+                uri = uri + tradeUsage(i)
+            Else
+                uri = uri + tradeUsage(i) + ","
+            End If
+        Next
+    End If
+    
+    If taxationType.Count > 0 Then
+        uri = uri + "&TaxationType="
+        For i = 1 To taxationType.Count
+            If i = taxationType.Count Then
+                uri = uri + taxationType(i)
+            Else
+                uri = uri + taxationType(i) + ","
+            End If
+        Next
+    End If
+    
+    
+    
+    uri = uri + "&Page=" + CStr(Page)
+    uri = uri + "&PerPage=" + CStr(PerPage)
+    
+    MsgBox uri
+    Set result = httpGET(uri, getSession_token(CorpNum), "")
+    
+    Set Search = New PBCBSearchList
+    
+    Search.fromDictionary result
+    
+    
+    Exit Function
+    
+    
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    Set Search = Nothing
+End Function

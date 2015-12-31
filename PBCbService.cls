@@ -1151,7 +1151,7 @@ ErrHandler:
 End Function
 
 '문서 목록조회
-Public Function Search(CorpNum As String, DType As String, SDate As String, EDate As String, State As Collection, tradeType As Collection, tradeUsage As Collection, taxationType As Collection, Page As Integer, PerPage As Integer) As PBCBSearchList
+Public Function Search(CorpNum As String, DType As String, SDate As String, EDate As String, State As Collection, tradeType As Collection, tradeUsage As Collection, taxationType As Collection, Page As Integer, PerPage As Integer, Order As String) As PBCBSearchList
 On Error GoTo ErrHandler
     Dim result As Variant
     Dim uri As String
@@ -1210,8 +1210,8 @@ On Error GoTo ErrHandler
     
     uri = uri + "&Page=" + CStr(Page)
     uri = uri + "&PerPage=" + CStr(PerPage)
+    uri = uri + "&Order=" + Order
     
-    MsgBox uri
     Set result = httpGET(uri, getSession_token(CorpNum), "")
     
     Set Search = New PBCBSearchList

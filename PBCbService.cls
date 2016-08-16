@@ -23,6 +23,8 @@ Option Explicit
 ' http://www.popbill.com
 ' Author : Kim Seongjun (pallet027@gmail.com)
 ' Written : 2014-09-29
+' Contributor : Jeong Yohan (code@linkhub.co.kr)
+' Updated : 2016-08-16
 '
 ' Thanks for your interest.
 '=================================================================================
@@ -31,6 +33,10 @@ Private Const ServiceID_TEST = "POPBILL_TEST"
 Private Const ServiceURL_REAL = "https://popbill.linkhub.co.kr"
 Private Const ServiceURL_TEST = "https://popbill_test.linkhub.co.kr"
 Private Const APIVersion = "1.0"
+
+Private Const adTypeBinary As Long = 1
+Private Const adTypeText As Long = 2
+Private Const adModeReadWrite As Long = 3
 
 Private m_IsTest As Boolean
 
@@ -49,6 +55,53 @@ Private Sub Class_Terminate()
     m_token_Dic.RemoveAll
     Set m_token_Dic = Nothing
 End Sub
+
+Private Function URLEncode(ByVal StringToEncode As String) As String
+   Dim i                As Integer
+   Dim iAsc             As Long
+   Dim sTemp            As String
+   
+   Dim ByteArrayToEncode() As Byte
+ 
+   ByteArrayToEncode = ADO_EncodeUTF8(StringToEncode)
+   
+   For i = 0 To UBound(ByteArrayToEncode)
+      iAsc = ByteArrayToEncode(i)
+      Select Case iAsc
+         Case 32 'space
+            sTemp = "+"
+         Case 48 To 57, 65 To 90, 97 To 122
+            sTemp = Chr(ByteArrayToEncode(i))
+         Case Else
+            Debug.Print iAsc
+            sTemp = "%" & Hex(iAsc)
+      End Select
+      URLEncode = URLEncode & sTemp
+   Next
+ 
+End Function
+  
+'Purpose: UTF16 to UTF8 using ADO
+Private Function ADO_EncodeUTF8(ByVal strUTF16 As String) As Byte()
+ 
+   Dim objStream        As Object
+   Dim Data()           As Byte
+ 
+   Set objStream = CreateObject("ADODB.Stream")
+   objStream.Charset = "utf-8"
+   objStream.Mode = adModeReadWrite
+   objStream.Type = adTypeText
+   objStream.Open
+   objStream.WriteText strUTF16
+   objStream.Flush
+   objStream.Position = 0
+   objStream.Type = adTypeBinary
+   objStream.Read 3 ' skip BOM
+   Data = objStream.Read()
+   objStream.Close
+   ADO_EncodeUTF8 = Data
+ 
+End Function
 Private Function UniStrToUTF8(UniString) As Byte()
    ' Convert a Unicode string to a byte stream of UTF-8
    Dim BArray() As Byte
@@ -1169,7 +1222,7 @@ ErrHandler:
 End Function
 
 '문서 목록조회
-Public Function Search(CorpNum As String, DType As String, SDate As String, EDate As String, State As Collection, tradeType As Collection, tradeUsage As Collection, taxationType As Collection, Page As Integer, PerPage As Integer, Order As String) As PBCBSearchList
+Public Function Search(CorpNum As String, DType As String, SDate As String, EDate As String, State As Collection, tradeType As Collection, tradeUsage As Collection, taxationType As Collection, Page As Integer, PerPage As Integer, Order As String, Optional QString As String) As PBCBSearchList
 On Error GoTo ErrHandler
     Dim result As Variant
     Dim uri As String
@@ -1224,7 +1277,9 @@ On Error GoTo ErrHandler
         Next
     End If
     
-    
+    If QString <> "" Then
+        uri = uri + "&QString=" + QString
+    End If
     
     uri = uri + "&Page=" + CStr(Page)
     uri = uri + "&PerPage=" + CStr(PerPage)

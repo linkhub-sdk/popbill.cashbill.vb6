@@ -24,7 +24,7 @@ Option Explicit
 ' Author : Kim Seongjun (pallet027@gmail.com)
 ' Written : 2014-09-29
 ' Contributor : Jeong Yohan (code@linkhub.co.kr)
-' Updated : 2016-08-16
+' Updated : 2017-02-23
 '
 ' Thanks for your interest.
 '=================================================================================
@@ -416,7 +416,7 @@ ErrHandler:
     Set CheckID = Nothing
 End Function
 '연동회원 담당자 목록조회
-Public Function ListContact(CorpNum As String, UserID As String) As Collection
+Public Function ListContact(CorpNum As String, Optional UserID As String = "") As Collection
 On Error GoTo ErrHandler
         
     Dim result As Variant
@@ -444,7 +444,7 @@ ErrHandler:
     Set ListContact = Nothing
 End Function
 '담당자 추가
-Public Function RegistContact(CorpNum As String, ContactInfo As PBContactInfo, UserID As String) As PBResponse
+Public Function RegistContact(CorpNum As String, ContactInfo As PBContactInfo, Optional UserID As String = "") As PBResponse
 On Error GoTo ErrHandler
     Set RegistContact = Nothing
     
@@ -512,7 +512,7 @@ ErrHandler:
     m_LastErrMessage = Err.Description
 End Function
 '회사정보 수정
-Public Function UpdateCorpInfo(CorpNum As String, CorpInfo As PBCorpInfo, UserID As String) As PBResponse
+Public Function UpdateCorpInfo(CorpNum As String, CorpInfo As PBCorpInfo, Optional UserID As String = "") As PBResponse
 On Error GoTo ErrHandler
     Set UpdateCorpInfo = Nothing
     
@@ -543,7 +543,7 @@ ErrHandler:
     m_LastErrMessage = Err.Description
 End Function
 '회사정보 조회
-Public Function GetCorpInfo(CorpNum As String, UserID As String) As PBCorpInfo
+Public Function GetCorpInfo(CorpNum As String, Optional UserID As String = "") As PBCorpInfo
 On Error GoTo ErrHandler
     Dim result As Variant
        
@@ -655,7 +655,7 @@ ErrHandler:
     m_LastErrMessage = Err.Description
 End Function
 '과금정보 조회
-Public Function GetChargeInfo(CorpNum As String, Optional UserID As String) As PBChargeInfo
+Public Function GetChargeInfo(CorpNum As String, Optional UserID As String = "") As PBChargeInfo
 On Error GoTo ErrHandler
     Dim result As Variant
        
@@ -821,7 +821,7 @@ ErrHandler:
 
 End Function
 '삭제
-Public Function Delete(CorpNum As String, mgtKey As String, Optional UserID As String) As PBResponse
+Public Function Delete(CorpNum As String, mgtKey As String, Optional UserID As String = "") As PBResponse
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -844,7 +844,7 @@ ErrHandler:
     Set Delete = Nothing
 End Function
 '발행
-Public Function Issue(CorpNum As String, mgtKey As String, Optional memo As String, Optional UserID As String) As PBResponse
+Public Function Issue(CorpNum As String, mgtKey As String, Optional memo As String, Optional UserID As String = "") As PBResponse
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -875,7 +875,7 @@ ErrHandler:
 End Function
 
 '발행 취소
-Public Function CancelIssue(CorpNum As String, mgtKey As String, Optional memo As String, Optional UserID As String) As PBResponse
+Public Function CancelIssue(CorpNum As String, mgtKey As String, Optional memo As String, Optional UserID As String = "") As PBResponse
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -903,7 +903,7 @@ ErrHandler:
 End Function
 
 '이메일 재전송
-Public Function SendEmail(CorpNum As String, mgtKey As String, Receiver As String, Optional UserID As String) As PBResponse
+Public Function SendEmail(CorpNum As String, mgtKey As String, Receiver As String, Optional UserID As String = "") As PBResponse
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -930,7 +930,7 @@ ErrHandler:
     m_LastErrMessage = Err.Description
 End Function
 '문자재선송
-Public Function SendSMS(CorpNum As String, mgtKey As String, Sender As String, Receiver As String, Contents As String, Optional UserID As String) As PBResponse
+Public Function SendSMS(CorpNum As String, mgtKey As String, Sender As String, Receiver As String, Contents As String, Optional UserID As String = "") As PBResponse
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -965,7 +965,7 @@ ErrHandler:
     m_LastErrMessage = Err.Description
 End Function
 '팩스 재전송
-Public Function SendFax(CorpNum As String, mgtKey As String, Sender As String, Receiver As String, Optional UserID As String) As PBResponse
+Public Function SendFax(CorpNum As String, mgtKey As String, Sender As String, Receiver As String, Optional UserID As String = "") As PBResponse
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -999,7 +999,7 @@ ErrHandler:
     m_LastErrMessage = Err.Description
 End Function
 '상태/요약정보 확인
-Public Function GetInfo(CorpNum As String, mgtKey As String, Optional UserID As String) As PBCbInfo
+Public Function GetInfo(CorpNum As String, mgtKey As String, Optional UserID As String = "") As PBCbInfo
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -1024,7 +1024,7 @@ ErrHandler:
     Set GetInfo = Nothing
 End Function
 '상태/요역정보 다량(최대1000건)확인
-Public Function GetInfos(CorpNum As String, MgtKeyList As Collection, Optional UserID As String) As Collection
+Public Function GetInfos(CorpNum As String, MgtKeyList As Collection, Optional UserID As String = "") As Collection
 On Error GoTo ErrHandler
     If MgtKeyList Is Nothing Or MgtKeyList.Count = 0 Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -1061,7 +1061,7 @@ ErrHandler:
     Set GetInfos = Nothing
 End Function
 '상세정보 확인
-Public Function GetDetailInfo(CorpNum As String, mgtKey As String, Optional UserID As String) As PBCashbill
+Public Function GetDetailInfo(CorpNum As String, mgtKey As String, Optional UserID As String = "") As PBCashbill
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -1086,7 +1086,7 @@ ErrHandler:
     Set GetDetailInfo = Nothing
 End Function
 '팝업URL 확인
-Public Function GetPopUpURL(CorpNum As String, mgtKey As String, UserID As String) As String
+Public Function GetPopUpURL(CorpNum As String, mgtKey As String, Optional UserID As String = "") As String
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -1105,7 +1105,7 @@ ErrHandler:
     GetPopUpURL = ""
 End Function
 '인쇄 URL확인
-Public Function GetPrintURL(CorpNum As String, mgtKey As String, UserID As String) As String
+Public Function GetPrintURL(CorpNum As String, mgtKey As String, Optional UserID As String = "") As String
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -1124,7 +1124,7 @@ ErrHandler:
     GetPrintURL = ""
 End Function
 '공급받는자 인쇄 URL확인
-Public Function GetEPrintURL(CorpNum As String, mgtKey As String, UserID As String) As String
+Public Function GetEPrintURL(CorpNum As String, mgtKey As String, Optional UserID As String = "") As String
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -1144,7 +1144,7 @@ ErrHandler:
 End Function
 
 '메일 URL확인
-Public Function GetMailURL(CorpNum As String, mgtKey As String, UserID As String) As String
+Public Function GetMailURL(CorpNum As String, mgtKey As String, Optional UserID As String = "") As String
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -1163,7 +1163,7 @@ ErrHandler:
     GetMailURL = ""
 End Function
 '다량인쇄 URL확인
-Public Function GetMassPrintURL(CorpNum As String, MgtKeyList As Collection, UserID As String) As String
+Public Function GetMassPrintURL(CorpNum As String, MgtKeyList As Collection, Optional UserID As String = "") As String
 On Error GoTo ErrHandler
     If MgtKeyList Is Nothing Or MgtKeyList.Count = 0 Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
@@ -1189,7 +1189,7 @@ ErrHandler:
 End Function
 
 '문서이력확인
-Public Function GetLogs(CorpNum As String, mgtKey As String, Optional UserID As String) As Collection
+Public Function GetLogs(CorpNum As String, mgtKey As String, Optional UserID As String = "") As Collection
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."

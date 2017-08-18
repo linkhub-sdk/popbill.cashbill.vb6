@@ -793,6 +793,7 @@ Public Function RevokeRegistIssue(CorpNum As String, mgtKey As String, orgConfir
     
     Dim result As Variant
     Dim postdata As String
+    Dim T As Variant
     
     Set T = CreateObject("Scripting.Dictionary")
     
@@ -824,6 +825,7 @@ Public Function RevokeRegister(CorpNum As String, mgtKey As String, orgConfirmNu
     
     Dim result As Variant
     Dim postdata As String
+    Dim T As Variant
     
     Set T = CreateObject("Scripting.Dictionary")
     

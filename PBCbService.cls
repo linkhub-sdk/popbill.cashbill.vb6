@@ -24,14 +24,14 @@ Option Explicit
 ' Author : Kim Seongjun (pallet027@gmail.com)
 ' Written : 2014-09-29
 ' Contributor : Jeong Yohan (code@linkhub.co.kr)
-' Updated : 2017-05-24
+' Updated : 2017-08-18
 '
 ' Thanks for your interest.
 '=================================================================================
 Private Const ServiceID_REAL = "POPBILL"
 Private Const ServiceID_TEST = "POPBILL_TEST"
 Private Const ServiceURL_REAL = "https://popbill.linkhub.co.kr"
-Private Const ServiceURL_TEST = "https://popbill_test.linkhub.co.kr"
+Private Const ServiceURL_TEST = "https://popbill-test.linkhub.co.kr"
 Private Const APIVersion = "1.0"
 
 Private Const adTypeBinary As Long = 1
@@ -786,6 +786,69 @@ ErrHandler:
     Set Register = Nothing
 
 End Function
+
+'취소현금영수증 즉시발행. (2017/08/18)
+Public Function RevokeRegistIssue(CorpNum As String, mgtKey As String, orgConfirmNum As String, orgTradeDate As String, Optional smssendYN As Boolean = False, Optional memo As String = "", Optional UserID As String = "") As PBResponse
+    On Error GoTo ErrHandler
+    
+    Dim result As Variant
+    Dim postdata As String
+    
+    Set T = CreateObject("Scripting.Dictionary")
+    
+    T.Add "mgtKey", mgtKey
+    T.Add "orgConfirmNum", orgConfirmNum
+    T.Add "orgTradeDate", orgTradeDate
+    T.Add "smssendYN", smssendYN
+    T.Add "memo", memo
+    
+    postdata = m_Linkhub.toString(T)
+    
+    Set result = httpPOST_override("/Cashbill", getSession_token(CorpNum), "REVOKEISSUE", postdata, UserID)
+    
+    Set RevokeRegistIssue = New PBResponse
+    
+    RevokeRegistIssue.code = result.Item("code")
+    RevokeRegistIssue.message = result.Item("message")
+    
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    Set RevokeRegistIssue = Nothing
+End Function
+
+'취소현금영수증 임시저장. (2017/08/18)
+Public Function RevokeRegister(CorpNum As String, mgtKey As String, orgConfirmNum As String, orgTradeDate As String, Optional smssendYN As Boolean = False, Optional UserID As String = "") As PBResponse
+    On Error GoTo ErrHandler
+    
+    Dim result As Variant
+    Dim postdata As String
+    
+    Set T = CreateObject("Scripting.Dictionary")
+    
+    T.Add "mgtKey", mgtKey
+    T.Add "orgConfirmNum", orgConfirmNum
+    T.Add "orgTradeDate", orgTradeDate
+    T.Add "smssendYN", smssendYN
+    
+    postdata = m_Linkhub.toString(T)
+    
+    Set result = httpPOST_override("/Cashbill", getSession_token(CorpNum), "REVOKE", postdata, UserID)
+    
+    Set RevokeRegister = New PBResponse
+    
+    RevokeRegister.code = result.Item("code")
+    RevokeRegister.message = result.Item("message")
+    
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    Set RevokeRegister = Nothing
+End Function
+
+
 '수정
 Public Function Update(CorpNum As String, mgtKey As String, Cashbill As PBCashbill, Optional UserID As String = "") As PBResponse
 On Error GoTo ErrHandler

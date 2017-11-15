@@ -24,7 +24,7 @@ Option Explicit
 ' Author : Kim Seongjun (pallet027@gmail.com)
 ' Written : 2014-09-29
 ' Contributor : Jeong Yohan (code@linkhub.co.kr)
-' Updated : 2017-08-30
+' Updated : 2017-11-15
 '
 ' Thanks for your interest.
 '=================================================================================
@@ -802,7 +802,9 @@ ErrHandler:
 End Function
 
 '취소현금영수증 즉시발행. (2017/08/18)
-Public Function RevokeRegistIssue(CorpNum As String, mgtKey As String, orgConfirmNum As String, orgTradeDate As String, Optional smssendYN As Boolean = False, Optional memo As String = "", Optional UserID As String = "") As PBResponse
+Public Function RevokeRegistIssue(CorpNum As String, mgtKey As String, orgConfirmNum As String, orgTradeDate As String, Optional smssendYN As Boolean = False, Optional memo As String = "", Optional UserID As String = "", _
+    Optional isPartCancel As Boolean = False, Optional cancelType As Integer = 0, Optional supplyCost As String = "", Optional tax As String = "", Optional serviceFee As String = "", Optional totalAmount As String = "") As PBResponse
+    
     On Error GoTo ErrHandler
     
     Dim result As Variant
@@ -816,6 +818,17 @@ Public Function RevokeRegistIssue(CorpNum As String, mgtKey As String, orgConfir
     T.Add "orgTradeDate", orgTradeDate
     T.Add "smssendYN", smssendYN
     T.Add "memo", memo
+    
+    T.Add "isPartCancel", isPartCancel
+    
+    If cancelType > 0 Then
+        T.Add "cancelType", cancelType
+    End If
+    
+    T.Add "supplyCost", supplyCost
+    T.Add "tax", tax
+    T.Add "serviceFee", serviceFee
+    T.Add "totalAmount", totalAmount
     
     postdata = m_Linkhub.toString(T)
     
@@ -834,7 +847,8 @@ ErrHandler:
 End Function
 
 '취소현금영수증 임시저장. (2017/08/18)
-Public Function RevokeRegister(CorpNum As String, mgtKey As String, orgConfirmNum As String, orgTradeDate As String, Optional smssendYN As Boolean = False, Optional UserID As String = "") As PBResponse
+Public Function RevokeRegister(CorpNum As String, mgtKey As String, orgConfirmNum As String, orgTradeDate As String, Optional smssendYN As Boolean = False, Optional UserID As String = "", _
+    Optional isPartCancel As Boolean = False, Optional cancelType As Integer = 0, Optional supplyCost As String = "", Optional tax As String = "", Optional serviceFee As String = "", Optional totalAmount As String = "") As PBResponse
     On Error GoTo ErrHandler
     
     Dim result As Variant
@@ -847,6 +861,17 @@ Public Function RevokeRegister(CorpNum As String, mgtKey As String, orgConfirmNu
     T.Add "orgConfirmNum", orgConfirmNum
     T.Add "orgTradeDate", orgTradeDate
     T.Add "smssendYN", smssendYN
+    
+    T.Add "isPartCancel", isPartCancel
+    
+    If cancelType > 0 Then
+        T.Add "cancelType", cancelType
+    End If
+    
+    T.Add "supplyCost", supplyCost
+    T.Add "tax", tax
+    T.Add "serviceFee", serviceFee
+    T.Add "totalAmount", totalAmount
     
     postdata = m_Linkhub.toString(T)
     

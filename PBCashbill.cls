@@ -46,6 +46,8 @@ Public confirmNum As String
 
 Public orgConfirmNum As String
 Public orgTradeDate As String
+Public cancelType As Integer
+
 
 
 
@@ -86,6 +88,8 @@ Set toDictionary = CreateObject("Scripting.Dictionary")
     toDictionary.Add "orgConfirmNum", orgConfirmNum
     toDictionary.Add "orgTradeDate", orgTradeDate
     
+    toDictionary.Add "cancelType", cancelType
+    
     
 End Function
 
@@ -124,5 +128,6 @@ Public Sub fromDictionary(dic As Variant)
     
     orgConfirmNum = dic.Item("orgConfirmNum")
     orgTradeDate = dic.Item("orgTradeDate")
+    cancelType = dic.Item("cancelType")
     
 End Sub

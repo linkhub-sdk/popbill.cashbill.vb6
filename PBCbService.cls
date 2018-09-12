@@ -1327,7 +1327,7 @@ ErrHandler:
 End Function
 
 '문서 목록조회
-Public Function Search(CorpNum As String, DType As String, SDate As String, EDate As String, State As Collection, tradeType As Collection, tradeUsage As Collection, taxationType As Collection, Page As Integer, PerPage As Integer, Order As String, Optional QString As String) As PBCBSearchList
+Public Function Search(CorpNum As String, DType As String, SDate As String, EDate As String, state As Collection, tradeType As Collection, tradeUsage As Collection, taxationType As Collection, Page As Integer, PerPage As Integer, Order As String, Optional QString As String) As PBCBSearchList
 On Error GoTo ErrHandler
     Dim result As Variant
     Dim uri As String
@@ -1338,13 +1338,13 @@ On Error GoTo ErrHandler
     uri = uri + "&SDate=" + SDate
     uri = uri + "&EDate=" + EDate
     
-    If State.Count > 0 Then
+    If state.Count > 0 Then
         uri = uri + "&State="
-        For i = 1 To State.Count
-            If i = State.Count Then
-                uri = uri + State(i)
+        For i = 1 To state.Count
+            If i = state.Count Then
+                uri = uri + state(i)
             Else
-                uri = uri + State(i) + ","
+                uri = uri + state(i) + ","
             End If
         Next
     End If
@@ -1405,3 +1405,59 @@ ErrHandler:
     m_LastErrMessage = Err.Description
     Set Search = Nothing
 End Function
+
+'알림메일 전송목록 조회
+Public Function ListEmailConfig(CorpNum As String, Optional UserID As String = "") As Collection
+    On Error GoTo ErrHandler
+    
+    Dim result As Variant
+
+    Set result = httpGET("/Cashbill/EmailSendConfig", getSession_token(CorpNum), UserID)
+   
+    Set ListEmailConfig = New Collection
+    
+    Dim T As Variant
+    Dim info As PBEmailConfig
+    
+    For Each T In result
+        Set info = New PBEmailConfig
+        
+        info.fromDictionary T
+        
+        ListEmailConfig.Add info
+    Next
+    
+    Exit Function
+
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    Set ListEmailConfig = Nothing
+End Function
+
+'알림메일 전송설정 수정
+Public Function UpdateEmailConfig(CorpNum As String, emailType As String, sendYN As Boolean, Optional UserID As String = "") As PBResponse
+    On Error GoTo ErrHandler
+    
+    Dim result As Variant
+
+    If emailType = "" Then
+        Err.Raise -99999999, "POPBILL", "메일전송 타입이 입력되지 않았습니다."
+    End If
+    
+    
+    Set result = httpPOST("/Cashbill/EmailSendConfig?EmailType=" + emailType + "&SendYN=" + CStr(sendYN), getSession_token(CorpNum), "", UserID)
+   
+    Set UpdateEmailConfig = New PBResponse
+    
+    UpdateEmailConfig.code = result.Item("code")
+    UpdateEmailConfig.message = result.Item("message")
+    
+    Exit Function
+
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    Set UpdateEmailConfig = Nothing
+End Function
+

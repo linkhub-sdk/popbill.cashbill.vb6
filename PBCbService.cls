@@ -169,10 +169,10 @@ Public Property Let IsTest(ByVal value As Boolean)
     m_IsTest = value
 End Property
 '초기화
-Public Sub Initialize(linkID As String, SecretKey As String)
+Public Sub Initialize(LinkID As String, SecretKey As String)
     Set m_Linkhub = New Linkhub
     
-    m_Linkhub.linkID = linkID
+    m_Linkhub.LinkID = LinkID
     m_Linkhub.SercetKey = SecretKey
     
     m_scope.Add "member"
@@ -453,8 +453,8 @@ On Error GoTo ErrHandler
     
     Set tmp = CreateObject("Scripting.Dictionary")
     
-    tmp.Add "id", ContactInfo.id
-    tmp.Add "pwd", ContactInfo.pwd
+    tmp.Add "id", ContactInfo.ID
+    tmp.Add "pwd", ContactInfo.PWD
     tmp.Add "personName", ContactInfo.personName
     tmp.Add "tel", ContactInfo.tel
     tmp.Add "hp", ContactInfo.hp
@@ -488,7 +488,7 @@ On Error GoTo ErrHandler
     
     Set tmp = CreateObject("Scripting.Dictionary")
     
-    tmp.Add "id", ContactInfo.id
+    tmp.Add "id", ContactInfo.ID
     tmp.Add "personName", ContactInfo.personName
     tmp.Add "tel", ContactInfo.tel
     tmp.Add "hp", ContactInfo.hp
@@ -613,11 +613,11 @@ ErrHandler:
     GetPopbillURL = ""
 End Function
 '회원가입 여부
-Public Function CheckIsMember(CorpNum As String, linkID As String) As PBResponse
+Public Function CheckIsMember(CorpNum As String, LinkID As String) As PBResponse
 On Error GoTo ErrHandler
     Dim result As Variant
     
-    Set result = httpGET("/Join?CorpNum=" + CorpNum + "&LID=" + linkID, "")
+    Set result = httpGET("/Join?CorpNum=" + CorpNum + "&LID=" + LinkID, "")
     
     Set CheckIsMember = New PBResponse
     CheckIsMember.code = result.Item("code")
@@ -638,7 +638,7 @@ On Error GoTo ErrHandler
     
     Set tmp = CreateObject("Scripting.Dictionary")
     
-    tmp.Add "LinkID", JoinInfo.linkID
+    tmp.Add "LinkID", JoinInfo.LinkID
     tmp.Add "CorpNum", JoinInfo.CorpNum
     tmp.Add "CorpName", JoinInfo.corpName
     tmp.Add "CEOName", JoinInfo.ceoname
@@ -651,8 +651,8 @@ On Error GoTo ErrHandler
     tmp.Add "ContactFAX", JoinInfo.ContactFAX
     tmp.Add "ContactHP", JoinInfo.ContactHP
     tmp.Add "ContactTEL", JoinInfo.ContactTEL
-    tmp.Add "ID", JoinInfo.id
-    tmp.Add "PWD", JoinInfo.pwd
+    tmp.Add "ID", JoinInfo.ID
+    tmp.Add "PWD", JoinInfo.PWD
     
     postdata = m_Linkhub.toString(tmp)
     
@@ -1327,7 +1327,7 @@ ErrHandler:
 End Function
 
 '문서 목록조회
-Public Function Search(CorpNum As String, DType As String, SDate As String, EDate As String, state As Collection, tradeType As Collection, tradeUsage As Collection, taxationType As Collection, Page As Integer, PerPage As Integer, Order As String, Optional QString As String) As PBCBSearchList
+Public Function Search(CorpNum As String, DType As String, SDate As String, EDate As String, state As Collection, tradeType As Collection, tradeUsage As Collection, taxationType As Collection, Page As Integer, PerPage As Integer, Order As String, Optional QString As String, Optional tradeOpt As Collection = Null) As PBCBSearchList
 On Error GoTo ErrHandler
     Dim result As Variant
     Dim uri As String
@@ -1367,6 +1367,17 @@ On Error GoTo ErrHandler
                 uri = uri + tradeUsage(i)
             Else
                 uri = uri + tradeUsage(i) + ","
+            End If
+        Next
+    End If
+    
+    If tradeOpt.Count > 0 Then
+        uri = uri + "&TradeOpt="
+        For i = 1 To tradeOpt.Count
+            If i = tradeOpt.Count Then
+                uri = uri + tradeOpt(i)
+            Else
+                uri = uri + tradeOpt(i) + ","
             End If
         Next
     End If

@@ -24,7 +24,9 @@ Public taxationType As String
 
 Public totalAmount As String
 Public tradeUsage As String
+Public tradeOpt As String
 Public tradeType As String
+Public stateMemo As String
 Public stateCode As Integer
 Public stateDT As String
 Public printYN As Boolean
@@ -53,7 +55,9 @@ Public Sub fromDictionary(dic As Variant)
     
     totalAmount = dic.Item("totalAmount")
     tradeUsage = dic.Item("tradeUsage")
+    tradeOpt = dic.Item("tradeOpt")
     tradeType = dic.Item("tradeType")
+    stateMemo = dic.Item("stateMemo")
     stateCode = dic.Item("stateCode")
     stateDT = dic.Item("stateDT")
     printYN = dic.Item("printYN")

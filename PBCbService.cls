@@ -25,6 +25,8 @@ Option Explicit
 ' Written : 2014-09-29
 ' Contributor : Jeong Yohan (code@linkhub.co.kr)
 ' Updated : 2017-11-15
+' Contributor : Kim Hyunjin (code@linkhub.co.kr)
+' Updated : 2018-11-21
 '
 ' Thanks for your interest.
 '=================================================================================

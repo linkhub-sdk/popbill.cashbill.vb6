@@ -272,7 +272,7 @@ Private Function httpPOST(url As String, BearerToken As String, postdata As Stri
     
 End Function
 
-Private Function httpPOST_override(url As String, BearerToken As String, override As String, postdata As String, Optional UserID As String) As Variant
+Private Function httpPOST_override(url As String, BearerToken As String, override As String, postdata As String, Optional UserID As String, Optional contentstype As String = "") As Variant
      
     Dim winhttp1
     
@@ -293,7 +293,11 @@ Private Function httpPOST_override(url As String, BearerToken As String, overrid
         Call winhttp1.setRequestHeader("x-pb-userid", UserID)
     End If
     
-    Call winhttp1.setRequestHeader("Content-Type", "Application/json")
+    If contentstype <> "" Then
+        Call winhttp1.setRequestHeader("Content-Type", contentstype)
+    Else
+        Call winhttp1.setRequestHeader("Content-Type", "Application/json")
+    End If
     
     winhttp1.Send (postdata)
         
@@ -1539,5 +1543,44 @@ ErrHandler:
     m_LastErrCode = Err.Number
     m_LastErrMessage = Err.Description
     Set UpdateEmailConfig = Nothing
+End Function
+
+Public Function AssignMgtKey(CorpNum As String, itemKey As String, mgtKey As String, Optional UserID As String = "") As PBResponse
+    On Error GoTo ErrHandler
+
+    Dim postdata As String
+    
+    If Not Len(itemKey) = 18 Then
+        Err.Raise -99999999, "POPBILL", "아이템키(itemKey)가 올바르지 않습니다."
+    End If
+    
+    If mgtKey = "" Then
+        Err.Raise -99999999, "POPBILL", "관리번호가 입력되지 않았습니다."
+    End If
+    
+    Dim result As Variant
+    Dim strKeyType As String
+    
+    postdata = "MgtKey=" + mgtKey
+    
+    
+    Set result = httpPOST_override("/Cashbill/" + itemKey, _
+                                    getSession_token(CorpNum), _
+                                    "", _
+                                    postdata, _
+                                    UserID, _
+                                    "application/x-www-form-urlencoded; charset=utf-8")
+                                    
+    Set AssignMgtKey = New PBResponse
+    
+    AssignMgtKey.code = result.Item("code")
+    AssignMgtKey.message = result.Item("message")
+    
+    Exit Function
+
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    Set AssignMgtKey = Nothing
 End Function
 

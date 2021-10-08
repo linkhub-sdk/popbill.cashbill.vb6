@@ -24,7 +24,7 @@ Option Explicit
 ' Author : Kim Seongjun (pallet027@gmail.com)
 ' Written : 2014-09-29
 ' Contributor : Jeong Yohan (code@linkhub.co.kr)
-' Updated : 2021-10-07
+' Updated : 2021-10-08
 '
 ' Thanks for your interest.
 '=================================================================================
@@ -1287,6 +1287,25 @@ On Error GoTo ErrHandler
     Dim result As Variant
     
     Set result = httpGET("/Cashbill/" + mgtKey + "?TG=POPUP", _
+                                getSession_token(CorpNum), UserID)
+    
+    GetPopUpURL = result.Item("url")
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    GetPopUpURL = ""
+End Function
+'팝업URL(메뉴x) 확인
+Public Function GetViewURL(CorpNum As String, mgtKey As String, Optional UserID As String = "") As String
+On Error GoTo ErrHandler
+    If mgtKey = "" Then
+        Err.Raise -99999999, "POPBILL", "문서번호가 입력되지 않았습니다."
+    End If
+    
+    Dim result As Variant
+    
+    Set result = httpGET("/Cashbill/" + mgtKey + "?TG=VIEW", _
                                 getSession_token(CorpNum), UserID)
     
     GetPopUpURL = result.Item("url")

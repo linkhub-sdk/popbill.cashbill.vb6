@@ -1308,12 +1308,12 @@ On Error GoTo ErrHandler
     Set result = httpGET("/Cashbill/" + mgtKey + "?TG=VIEW", _
                                 getSession_token(CorpNum), UserID)
     
-    GetPopUpURL = result.Item("url")
+    GetViewURL = result.Item("url")
     Exit Function
 ErrHandler:
     m_LastErrCode = Err.Number
     m_LastErrMessage = Err.Description
-    GetPopUpURL = ""
+    GetViewURL = ""
 End Function
 '¿Œº‚ URL»Æ¿Œ
 Public Function GetPrintURL(CorpNum As String, mgtKey As String, Optional UserID As String = "") As String

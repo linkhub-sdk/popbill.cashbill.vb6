@@ -853,6 +853,8 @@ Public Function RegistIssue(CorpNum As String, Cashbill As PBCashbill, Optional 
     
     RegistIssue.code = result.Item("code")
     RegistIssue.message = result.Item("message")
+    RegistIssue.confirmNum = result.Item("confirmNum")
+    RegistIssue.tradeDate = result.Item("tradeDate")
     
     Exit Function
 ErrHandler:
@@ -925,6 +927,8 @@ Public Function RevokeRegistIssue(CorpNum As String, mgtKey As String, orgConfir
     
     RevokeRegistIssue.code = result.Item("code")
     RevokeRegistIssue.message = result.Item("message")
+    RevokeRegistIssue.confirmNum = result.Item("confirmNum")
+    RevokeRegistIssue.tradeDate = result.Item("tradeDate")
     
     Exit Function
 ErrHandler:
@@ -1058,6 +1062,8 @@ On Error GoTo ErrHandler
     
     Issue.code = result.Item("code")
     Issue.message = result.Item("message")
+    Issue.confirmNum = result.Item("confirmNum")
+    Issue.tradeDate = result.Item("tradeDate")
     
     Exit Function
     

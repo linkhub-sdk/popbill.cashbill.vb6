@@ -28,6 +28,7 @@ Public serviceFee As String
 Public totalAmount As String
 
 Public franchiseCorpNum As String
+Public franchiseTaxRegID As String
 Public franchiseCorpName As String
 Public franchiseCEOName As String
 Public franchiseAddr As String
@@ -71,6 +72,7 @@ Set toDictionary = CreateObject("Scripting.Dictionary")
     toDictionary.Add "totalAmount", totalAmount
     
     toDictionary.Add "franchiseCorpNum", franchiseCorpNum
+    toDictionary.Add "franchiseTaxRegID", franchiseTaxRegID
     toDictionary.Add "franchiseCorpName", franchiseCorpName
     toDictionary.Add "franchiseCEOName", franchiseCEOName
     toDictionary.Add "franchiseAddr", franchiseAddr
@@ -113,6 +115,7 @@ Public Sub fromDictionary(dic As Variant)
     totalAmount = dic.Item("totalAmount")
     
     franchiseCorpNum = dic.Item("franchiseCorpNum")
+    franchiseTaxRegID = dic.Item("franchiseTaxRegID")
     franchiseCorpName = dic.Item("franchiseCorpName")
     franchiseCEOName = dic.Item("franchiseCEOName")
     franchiseAddr = dic.Item("franchiseAddr")

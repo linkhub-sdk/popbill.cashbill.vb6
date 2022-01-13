@@ -24,7 +24,7 @@ Option Explicit
 ' Author : Kim Seongjun (pallet027@gmail.com)
 ' Written : 2014-09-29
 ' Contributor : Jeong Yohan (code@linkhub.co.kr)
-' Updated : 2021-10-08
+' Updated : 2022-01-13
 '
 ' Thanks for your interest.
 '=================================================================================
@@ -1457,7 +1457,7 @@ ErrHandler:
 End Function
 
 '문서 목록조회
-Public Function Search(CorpNum As String, DType As String, SDate As String, EDate As String, state As Collection, tradeType As Collection, tradeUsage As Collection, taxationType As Collection, Page As Integer, PerPage As Integer, Order As String, Optional QString As String, Optional tradeOpt As Collection = Null) As PBCBSearchList
+Public Function Search(CorpNum As String, DType As String, SDate As String, EDate As String, state As Collection, tradeType As Collection, tradeUsage As Collection, taxationType As Collection, Page As Integer, PerPage As Integer, Order As String, Optional QString As String, Optional tradeOpt As Collection = Null, Optional franchiseTaxRedID As String) As PBCBSearchList
 On Error GoTo ErrHandler
     Dim result As Variant
     Dim uri As String
@@ -1501,16 +1501,19 @@ On Error GoTo ErrHandler
         Next
     End If
     
-    If tradeOpt.Count > 0 Then
-        uri = uri + "&TradeOpt="
-        For i = 1 To tradeOpt.Count
-            If i = tradeOpt.Count Then
-                uri = uri + tradeOpt(i)
-            Else
-                uri = uri + tradeOpt(i) + ","
-            End If
-        Next
+    If Not (tradeOpt Is Nothing) Then
+        If tradeOpt.Count > 0 Then
+            uri = uri + "&TradeOpt="
+            For i = 1 To tradeOpt.Count
+                If i = tradeOpt.Count Then
+                    uri = uri + tradeOpt(i)
+                Else
+                    uri = uri + tradeOpt(i) + ","
+                End If
+            Next
+        End If
     End If
+
     
     If taxationType.Count > 0 Then
         uri = uri + "&TaxationType="
@@ -1525,6 +1528,10 @@ On Error GoTo ErrHandler
     
     If QString <> "" Then
         uri = uri + "&QString=" + QString
+    End If
+    
+    If franchiseTaxRedID <> "" Then
+        uri = uri + "&FranchiseTaxRegID=" + franchiseTaxRedID
     End If
     
     uri = uri + "&Page=" + CStr(Page)

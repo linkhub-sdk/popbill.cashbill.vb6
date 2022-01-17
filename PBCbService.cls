@@ -23,7 +23,7 @@ Option Explicit
 ' http://www.popbill.com
 ' Author : Kim Seongjun (pallet027@gmail.com)
 ' Written : 2014-09-29
-' Contributor : Jeong Yohan (code@linkhub.co.kr)
+' Contributor : Jeong Yohan (code@linkhubcorp.com)
 ' Updated : 2022-01-17
 '
 ' Thanks for your interest.
@@ -194,10 +194,10 @@ Public Property Let UseLocalTimeYN(ByVal value As Boolean)
 End Property
 
 '초기화
-Public Sub Initialize(LinkID As String, SecretKey As String)
+Public Sub Initialize(linkID As String, SecretKey As String)
     Set m_Linkhub = New Linkhub
     
-    m_Linkhub.LinkID = LinkID
+    m_Linkhub.linkID = linkID
     m_Linkhub.SercetKey = SecretKey
     
     m_scope.Add "member"
@@ -750,19 +750,19 @@ ErrHandler:
    GetChargeURL = ""
 End Function
 '회원가입 여부
-Public Function CheckIsMember(CorpNum As String, LinkID As String) As PBResponse
+Public Function CheckIsMember(CorpNum As String, linkID As String) As PBResponse
 On Error GoTo ErrHandler
     If CorpNum = "" Then
         Err.Raise -99999999, "POPBILL", "팝빌회원의 사업자번호가 입력되지 않았습니다."
     End If
 
-    If LinkID = "" Then
+    If linkID = "" Then
         Err.Raise -99999999, "POPBILL", "링크아이디(LinkID)가 입력되지 않았습니다."
     End If
     
     Dim result As Variant
     
-    Set result = httpGET("/Join?CorpNum=" + CorpNum + "&LID=" + LinkID, "")
+    Set result = httpGET("/Join?CorpNum=" + CorpNum + "&LID=" + linkID, "")
     
     Set CheckIsMember = New PBResponse
     CheckIsMember.code = result.Item("code")
@@ -783,7 +783,7 @@ On Error GoTo ErrHandler
     
     Set tmp = CreateObject("Scripting.Dictionary")
     
-    tmp.Add "LinkID", JoinInfo.LinkID
+    tmp.Add "LinkID", JoinInfo.linkID
     tmp.Add "CorpNum", JoinInfo.CorpNum
     tmp.Add "CorpName", JoinInfo.corpName
     tmp.Add "CEOName", JoinInfo.ceoname

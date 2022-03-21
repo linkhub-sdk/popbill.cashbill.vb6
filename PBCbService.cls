@@ -21,10 +21,10 @@ Option Explicit
 ' on system32 by default.
 '
 ' http://www.popbill.com
-' Author : Kim Seongjun (pallet027@gmail.com)
+' Author : Kim Seongjun
 ' Written : 2014-09-29
 ' Contributor : Jeong Yohan (code@linkhubcorp.com)
-' Updated : 2022-01-17
+' Updated : 2022-03-21
 '
 ' Thanks for your interest.
 '=================================================================================
@@ -194,10 +194,10 @@ Public Property Let UseLocalTimeYN(ByVal value As Boolean)
 End Property
 
 '초기화
-Public Sub Initialize(linkID As String, SecretKey As String)
+Public Sub Initialize(LinkID As String, SecretKey As String)
     Set m_Linkhub = New Linkhub
     
-    m_Linkhub.linkID = linkID
+    m_Linkhub.LinkID = LinkID
     m_Linkhub.SercetKey = SecretKey
     
     m_scope.Add "member"
@@ -351,6 +351,57 @@ Private Function httpPOST_override(URL As String, BearerToken As String, overrid
     Set winhttp1 = Nothing
     
     Set httpPOST_override = m_Linkhub.parse(Response)
+
+End Function
+
+Private Function httpPOST_Bulk(URL As String, BearerToken As String, override As String, submitID As String, postData As String, Optional UserID As String) As Variant
+     
+    Dim winhttp1
+    
+    Set winhttp1 = CreateObject("MSXML2.XMLHTTP.6.0")
+    Call winhttp1.Open("POST", getTargetURL() + URL, False)
+    Call winhttp1.setRequestHeader("x-pb-version", APIVersion)
+    Call winhttp1.setRequestHeader("Accept-Encoding", "gzip,deflate")
+    Call winhttp1.setRequestHeader("x-pb-message-digest", m_Linkhub.Encode(m_Linkhub.SHA1(m_Linkhub.ToUTF8(postData)), edfBase64, efNoFolding) + Chr(10))
+    
+    If BearerToken <> "" Then
+        Call winhttp1.setRequestHeader("Authorization", "Bearer " + BearerToken)
+    End If
+    
+    If submitID <> "" Then
+        Call winhttp1.setRequestHeader("x-pb-submit-id", submitID)
+    End If
+    
+    If override <> "" Then
+        Call winhttp1.setRequestHeader("X-HTTP-Method-Override", override)
+    End If
+    
+    If UserID <> "" Then
+        Call winhttp1.setRequestHeader("x-pb-userid", UserID)
+    End If
+    
+    Call winhttp1.setRequestHeader("Content-Type", "Application/json")
+    
+    winhttp1.Send (postData)
+        
+    Dim Response As String
+    Response = winhttp1.responseText
+       
+    Dim parsedDic As Object
+    
+    If winhttp1.Status <> 200 Then
+    
+        Set parsedDic = m_Linkhub.parse(Response)
+        
+        Err.Raise parsedDic.Item("code"), "POPBILL", IIf(IsNull(parsedDic.Item("message")), "Null Exception", parsedDic.Item("message"))
+        
+        Exit Function
+        
+    End If
+    
+    Set winhttp1 = Nothing
+    
+    Set httpPOST_Bulk = m_Linkhub.parse(Response)
 
 End Function
 
@@ -750,19 +801,19 @@ ErrHandler:
    GetChargeURL = ""
 End Function
 '회원가입 여부
-Public Function CheckIsMember(CorpNum As String, linkID As String) As PBResponse
+Public Function CheckIsMember(CorpNum As String, LinkID As String) As PBResponse
 On Error GoTo ErrHandler
     If CorpNum = "" Then
         Err.Raise -99999999, "POPBILL", "팝빌회원의 사업자번호가 입력되지 않았습니다."
     End If
 
-    If linkID = "" Then
+    If LinkID = "" Then
         Err.Raise -99999999, "POPBILL", "링크아이디(LinkID)가 입력되지 않았습니다."
     End If
     
     Dim result As Variant
     
-    Set result = httpGET("/Join?CorpNum=" + CorpNum + "&LID=" + linkID, "")
+    Set result = httpGET("/Join?CorpNum=" + CorpNum + "&LID=" + LinkID, "")
     
     Set CheckIsMember = New PBResponse
     CheckIsMember.code = result.Item("code")
@@ -783,7 +834,7 @@ On Error GoTo ErrHandler
     
     Set tmp = CreateObject("Scripting.Dictionary")
     
-    tmp.Add "LinkID", JoinInfo.linkID
+    tmp.Add "LinkID", JoinInfo.LinkID
     tmp.Add "CorpNum", JoinInfo.CorpNum
     tmp.Add "CorpName", JoinInfo.corpName
     tmp.Add "CEOName", JoinInfo.ceoname
@@ -894,15 +945,15 @@ ErrHandler:
 End Function
 
 '즉시발행
-Public Function RegistIssue(CorpNum As String, Cashbill As PBCashbill, Optional UserID As String = "", Optional emailSubject As String = "") As PBResponse
+Public Function RegistIssue(CorpNum As String, cashbill As PBCashbill, Optional UserID As String = "", Optional emailSubject As String = "") As PBResponse
     On Error GoTo ErrHandler
 
     Dim result As Variant
     Dim tmpDic As Variant
     
-    Cashbill.emailSubject = emailSubject
+    cashbill.emailSubject = emailSubject
     
-    Set tmpDic = Cashbill.toDictionary
+    Set tmpDic = cashbill.toDictionary
     
     Dim postData As String
     
@@ -923,14 +974,84 @@ ErrHandler:
     m_LastErrMessage = Err.Description
     Set RegistIssue = Nothing
 End Function
+
+'초대량 발행 접수
+Public Function BulkSubmit(CorpNum As String, submitID As String, cashbillList As Collection, Optional UserID As String = "") As PBBulkResponse
+    On Error GoTo ErrHandler
+    
+    Dim result As Variant
+    
+    If submitID = "" Then
+        Err.Raise -99999999, "POPBILL", "제출아이디가 입력되지 않았습니다.."
+    End If
+    
+    If cashbillList.Count = 0 Or IsEmpty(cashbillList) Then
+        Err.Raise -99999999, "POPBILL", "현금영수증 정보가 입력되지 않았습니다."
+    End If
+    
+    Dim PBBulkCashbillSubmit As New PBBulkCashbillSubmit
+    
+    Dim cashbill As PBCashbill
+
+    For Each cashbill In cashbillList
+    
+        PBBulkCashbillSubmit.cashbills.Add cashbill
+        
+    Next
+    
+    Dim tmpDic As Variant
+    Set tmpDic = PBBulkCashbillSubmit.toDictionary
+    
+    Dim postData As String
+    
+    postData = m_Linkhub.toString(tmpDic)
+    
+    Set result = httpPOST_Bulk("/Cashbill", getSession_token(CorpNum), "BULKISSUE", submitID, postData, UserID)
+    
+    Set BulkSubmit = New PBBulkResponse
+    
+    BulkSubmit.code = result.Item("code")
+    BulkSubmit.message = result.Item("message")
+    BulkSubmit.receiptID = result.Item("receiptID")
+    
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    Set BulkSubmit = Nothing
+End Function
+
+'초대량 접수결과 확인
+Public Function GetBulkResult(CorpNum As String, submitID As String, Optional UserID As String = "") As PBBulkCashbillResult
+    On Error GoTo ErrHandler
+    
+    Dim result As Variant
+    
+    If submitID = "" Then
+        Err.Raise -99999999, "POPBILL", "제출아이디가 입력되지 않았습니다.."
+    End If
+    
+    Set result = httpGET("/Cashbill/BULK/" + submitID + "/State", getSession_token(CorpNum), UserID)
+    
+    Set GetBulkResult = New PBBulkCashbillResult
+    
+    GetBulkResult.fromDictionary result
+    
+    Exit Function
+    
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    Set GetBulkResult = Nothing
+End Function
 '임시저장
-Public Function Register(CorpNum As String, Cashbill As PBCashbill, Optional UserID As String = "") As PBResponse
+Public Function Register(CorpNum As String, cashbill As PBCashbill, Optional UserID As String = "") As PBResponse
     On Error GoTo ErrHandler
 
     Dim result As Variant
     Dim tmpDic As Variant
     
-    Set tmpDic = Cashbill.toDictionary
+    Set tmpDic = cashbill.toDictionary
     
     Dim postData As String
     
@@ -1043,7 +1164,7 @@ End Function
 
 
 '수정
-Public Function Update(CorpNum As String, mgtKey As String, Cashbill As PBCashbill, Optional UserID As String = "") As PBResponse
+Public Function Update(CorpNum As String, mgtKey As String, cashbill As PBCashbill, Optional UserID As String = "") As PBResponse
 On Error GoTo ErrHandler
     If mgtKey = "" Then
         Err.Raise -99999999, "POPBILL", "문서번호가 입력되지 않았습니다."
@@ -1053,7 +1174,7 @@ On Error GoTo ErrHandler
     
     Dim tmpDic As Variant
     
-    Set tmpDic = Cashbill.toDictionary
+    Set tmpDic = cashbill.toDictionary
     
     Dim postData As String
     

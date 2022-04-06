@@ -24,7 +24,7 @@ Option Explicit
 ' Author : Kim Seongjun
 ' Written : 2014-09-29
 ' Contributor : Jeong Yohan (code@linkhubcorp.com)
-' Updated : 2022-03-21
+' Updated : 2022-04-06
 '
 ' Thanks for your interest.
 '=================================================================================

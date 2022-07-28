@@ -24,7 +24,7 @@ Option Explicit
 ' Author : Kim Seongjun
 ' Written : 2014-09-29
 ' Contributor : Jeong Yohan (code@linkhubcorp.com)
-' Updated : 2022-07-25
+' Updated : 2022-07-26
 '
 ' Thanks for your interest.
 '=================================================================================
@@ -271,6 +271,7 @@ Private Function httpGET(URL As String, BearerToken As String, Optional UserID A
     Call winhttp1.setRequestHeader("Authorization", "Bearer " + BearerToken)
     Call winhttp1.setRequestHeader("x-pb-version", APIVersion)
     Call winhttp1.setRequestHeader("Accept-Encoding", "gzip,deflate")
+    Call winhttp1.setRequestHeader("User-Agent", "VB6 POPBiLL SDK")
     
     If UserID <> "" Then
         Call winhttp1.setRequestHeader("x-pb-userid", UserID)
@@ -312,6 +313,7 @@ Private Function httpPOST_override(URL As String, BearerToken As String, overrid
     Call winhttp1.Open("POST", getTargetURL() + URL, False)
     Call winhttp1.setRequestHeader("x-pb-version", APIVersion)
     Call winhttp1.setRequestHeader("Accept-Encoding", "gzip,deflate")
+    Call winhttp1.setRequestHeader("User-Agent", "VB6 POPBiLL SDK")
     
     If BearerToken <> "" Then
         Call winhttp1.setRequestHeader("Authorization", "Bearer " + BearerToken)
@@ -362,6 +364,7 @@ Private Function httpPOST_Bulk(URL As String, BearerToken As String, override As
     Call winhttp1.Open("POST", getTargetURL() + URL, False)
     Call winhttp1.setRequestHeader("x-pb-version", APIVersion)
     Call winhttp1.setRequestHeader("Accept-Encoding", "gzip,deflate")
+    Call winhttp1.setRequestHeader("User-Agent", "VB6 POPBiLL SDK")
     Call winhttp1.setRequestHeader("x-pb-message-digest", m_Linkhub.Encode(m_Linkhub.SHA1(m_Linkhub.ToUTF8(postData)), edfBase64, efNoFolding) + Chr(10))
     
     If BearerToken <> "" Then
@@ -423,6 +426,7 @@ Private Function httpPOST_File(URL As String, BearerToken As String, postData As
     Call winhttp1.Open("POST", getTargetURL() + URL, False)
     Call winhttp1.setRequestHeader("x-pb-version", APIVersion)
     Call winhttp1.setRequestHeader("Accept-Encoding", "gzip,deflate")
+    Call winhttp1.setRequestHeader("User-Agent", "VB6 POPBiLL SDK")
     
     
     If BearerToken <> "" Then

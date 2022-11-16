@@ -19,6 +19,7 @@ Public code             As Long
 Public message          As String
 Public confirmNum       As String
 Public tradeDate        As String
+Public tradeDT        As String
 
 Public Sub fromDictinary(dic As Variant)
     mgtKey = dic.Item("mgtKey")
@@ -26,6 +27,7 @@ Public Sub fromDictinary(dic As Variant)
     message = dic.Item("message")
     confirmNum = dic.Item("confirmNum")
     tradeDate = dic.Item("tradeDate")
+    tradeDT = dic.Item("tradeDT")
 End Sub
 
 

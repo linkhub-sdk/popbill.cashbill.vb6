@@ -16,6 +16,7 @@ Option Explicit
 Public itemKey As String
 Public mgtKey As String
 Public tradeDate As String
+Public tradeDT As String
 Public issueDT As String
 Public customerName As String
 Public itemName As String
@@ -47,6 +48,7 @@ Public Sub fromDictionary(dic As Variant)
     itemKey = dic.Item("itemKey")
     mgtKey = dic.Item("mgtKey")
     tradeDate = dic.Item("tradeDate")
+    tradeDT = dic.Item("tradeDT")
     issueDT = dic.Item("issueDT")
     customerName = dic.Item("customerName")
     itemName = dic.Item("itemName")

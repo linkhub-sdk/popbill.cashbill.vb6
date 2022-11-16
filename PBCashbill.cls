@@ -17,6 +17,7 @@ Public memo As String
 Public emailSubject As String
 Public mgtKey As String
 Public tradeDate As String
+Public tradeDT As String
 Public tradeUsage As String
 Public tradeOpt As String
 Public tradeType As String
@@ -61,6 +62,7 @@ Set toDictionary = CreateObject("Scripting.Dictionary")
     toDictionary.Add "emailSubject", emailSubject
     toDictionary.Add "mgtKey", mgtKey
     toDictionary.Add "tradeDate", tradeDate
+    toDictionary.Add "tradeDT", tradeDT
     toDictionary.Add "tradeUsage", tradeUsage
     toDictionary.Add "tradeOpt", tradeOpt
     toDictionary.Add "tradeType", tradeType
@@ -104,6 +106,7 @@ Public Sub fromDictionary(dic As Variant)
 
     mgtKey = dic.Item("mgtKey")
     tradeDate = dic.Item("tradeDate")
+    tradeDT = dic.Item("tradeDT")
     tradeUsage = dic.Item("tradeUsage")
     tradeOpt = dic.Item("tradeOpt")
     tradeType = dic.Item("tradeType")

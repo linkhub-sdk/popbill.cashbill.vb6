@@ -24,7 +24,7 @@ Option Explicit
 ' Author : Kim Seongjun
 ' Written : 2014-09-29
 ' Contributor : Jeong Yohan (code@linkhubcorp.com)
-' Updated : 2022-07-26
+' Updated : 2022-11-16
 '
 ' Thanks for your interest.
 '=================================================================================
@@ -971,6 +971,7 @@ Public Function RegistIssue(CorpNum As String, cashbill As PBCashbill, Optional 
     RegistIssue.message = result.Item("message")
     RegistIssue.confirmNum = result.Item("confirmNum")
     RegistIssue.tradeDate = result.Item("tradeDate")
+    RegistIssue.tradeDT = result.Item("tradeDT")
     
     Exit Function
 ErrHandler:
@@ -1078,7 +1079,7 @@ End Function
 
 '취소현금영수증 즉시발행. (2017/08/18)
 Public Function RevokeRegistIssue(CorpNum As String, mgtKey As String, orgConfirmNum As String, orgTradeDate As String, Optional smssendYN As Boolean = False, Optional memo As String = "", Optional UserID As String = "", _
-    Optional isPartCancel As Boolean = False, Optional cancelType As Integer = 0, Optional supplyCost As String = "", Optional tax As String = "", Optional serviceFee As String = "", Optional totalAmount As String = "") As PBResponse
+    Optional isPartCancel As Boolean = False, Optional cancelType As Integer = 0, Optional supplyCost As String = "", Optional tax As String = "", Optional serviceFee As String = "", Optional totalAmount As String = "", Optional emailSubject As String = "", Optional tradeDT As String = "") As PBResponse
     
     On Error GoTo ErrHandler
     
@@ -1093,6 +1094,8 @@ Public Function RevokeRegistIssue(CorpNum As String, mgtKey As String, orgConfir
     T.Add "orgTradeDate", orgTradeDate
     T.Add "smssendYN", smssendYN
     T.Add "memo", memo
+    T.Add "emailSubject", emailSubject
+    T.Add "tradeDT", tradeDT
     
     T.Add "isPartCancel", isPartCancel
     
@@ -1115,6 +1118,7 @@ Public Function RevokeRegistIssue(CorpNum As String, mgtKey As String, orgConfir
     RevokeRegistIssue.message = result.Item("message")
     RevokeRegistIssue.confirmNum = result.Item("confirmNum")
     RevokeRegistIssue.tradeDate = result.Item("tradeDate")
+    RevokeRegistIssue.tradeDT = result.Item("tradeDT")
     
     Exit Function
 ErrHandler:
@@ -1250,6 +1254,7 @@ On Error GoTo ErrHandler
     Issue.message = result.Item("message")
     Issue.confirmNum = result.Item("confirmNum")
     Issue.tradeDate = result.Item("tradeDate")
+    Issue.tradeDT = result.Item("tradeDT")
     
     Exit Function
     
